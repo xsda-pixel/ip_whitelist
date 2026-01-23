@@ -36,11 +36,6 @@ function createColumns({del, edit}: {
       align: 'center',
     },
     {
-      title: '用户名',
-      key: 'username',
-      align: 'center',
-    },
-    {
       title: 'Access Key',
       key: 'accessKey',
       align: 'center',
@@ -80,6 +75,11 @@ function createColumns({del, edit}: {
             }
         )
       }
+    },
+    {
+      title: '用户名',
+      key: 'username',
+      align: 'center',
     },
     {
       title: '备注',
