@@ -1,4 +1,4 @@
-use tauri::{Manager, WindowEvent};
+use tauri::{menu::{Menu, MenuItem}, tray::TrayIconBuilder, Manager, WindowEvent};
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -11,14 +11,39 @@ pub fn run() {
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![greet])
-        .setup(|_app| {
-            // 这里可以做初始化
+        .setup(|app| {
+            // ---- 系统托盘配置 (解决 Windows 彻底退出问题) ----
+            let quit_i = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
+            let show_i = MenuItem::with_id(app, "show", "显示窗口", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&show_i, &quit_i])?;
+
+            let _tray = TrayIconBuilder::new()
+                .icon(app.default_window_icon().unwrap().clone())
+                .menu(&menu)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "quit" => {
+                        app.exit(0); // 这里是 Windows 彻底退出的唯一途径
+                    }
+                    "show" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let tauri::tray::TrayIconEvent::DoubleClick { .. } = event {
+                        let _ = tray.app_handle().get_webview_window("main").unwrap().show();
+                        let _ = tray.app_handle().get_webview_window("main").unwrap().set_focus();
+                    }
+                })
+                .build(app)?;
             Ok(())
         })
         .build(tauri::generate_context!()) // ⚠️ 关键修改：这里用 build()
         .expect("error while building tauri application");
 
-    // 第二步：在 app 实例上调用 run，这里才允许传入回调逻辑
     app.run(|app_handle, event| {
         match event {
             tauri::RunEvent::WindowEvent { label, event, .. } => {
@@ -27,16 +52,10 @@ pub fn run() {
                         // 1. 阻止默认关闭
                         api.prevent_close();
 
-                        // 2. 执行最小化或隐藏
-                        // 注意：这里使用 app_handle 来获取窗口
                         if let Some(window) = app_handle.get_webview_window(&label) {
-                            // Mac 上推荐用 hide
-                            #[cfg(target_os = "macos")]
+                            // 无论 Mac 还是 Windows，点击 X 都直接隐藏窗口
+                            // 这样 Windows 任务栏就不会有图标，应用在后台运行
                             let _ = window.hide();
-
-                            // Windows 上依然推荐 minimize
-                            #[cfg(not(target_os = "macos"))]
-                            let _ = window.minimize();
                         }
                     }
                     _ => {}
@@ -47,10 +66,10 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             tauri::RunEvent::Reopen { .. } => {
                  // 找到主窗口并显示
-                 if let Some(window) = app_handle.get_webview_window("main") {
-                     let _ = window.show();
-                     let _ = window.set_focus(); // 让它获得焦点
-                 }
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus(); // 让它获得焦点
+                }
             }
             _ => {}
         }
