@@ -44,6 +44,7 @@ pub fn run() {
             }
             // 2. 👇 新增：处理 Mac Dock 图标点击事件
             // 当应用还在运行但窗口不可见时，点击 Dock 图标会触发这个事件
+            #[cfg(target_os = "macos")]
             tauri::RunEvent::Reopen { .. } => {
                  // 找到主窗口并显示
                  if let Some(window) = app_handle.get_webview_window("main") {
