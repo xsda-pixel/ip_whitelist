@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import {NButton, useMessage, useDialog, NSpace, NSwitch} from 'naive-ui'
+import {NButton, useMessage, useDialog, NSpace, NSwitch, NText, NIcon} from 'naive-ui'
 import type {DataTableColumns} from 'naive-ui'
 import {ref, h, onMounted, reactive, toRaw} from 'vue'
 import {useGlobalLoading} from '@/composables/useGlobalLoading'
-import {useUserStore} from "@/stores/userStore";
+import {useUserStore} from '@/stores/userStore'
 import {UserItemData, UserRequestData, UserStatus} from '@/types/user'
 import {createUserAPI, deleteUserAPI, getUserListAPI, updateUserAPI, updateUserStatusAPI} from '@/apis/user'
+import {CopyOutline} from '@vicons/ionicons5'
 
 const {startLoading, stopLoading} = useGlobalLoading()
 const items = ref<UserItemData[]>([])
@@ -34,29 +35,86 @@ function createColumns({del, edit}: {
       title: '区域',
       key: 'region',
       align: 'center',
+      width: 120,
+      ellipsis: {
+        tooltip: true
+      }
     },
     {
       title: 'Access Key',
       key: 'accessKey',
       align: 'center',
+      width: 120,
+      ellipsis: {
+        tooltip: true
+      }
     },
     {
       title: '安全组ID',
       key: 'groupId',
       align: 'center',
+      width: 120,
+      ellipsis: {
+        tooltip: true
+      }
     },
     {
       title: '端口号',
       key: 'ports',
       align: 'center',
+      ellipsis: {
+        tooltip: true
+      },
       render(row) {
-        return row.ports.join(',')
+        if (row.ports.length === 0) return '-';
+        return h(
+            NSpace,
+            {
+              align: 'center',   // 关键：确保子元素在交叉轴（垂直方向）居中
+              justify: 'center',
+              inline: true,
+              wrap: false,       // 强制不换行
+              size: 6            // 设置文字和图标的间距
+            },
+            {
+              default: () => [
+                h(
+                    NText,
+                    {
+                      depth: 2,
+                      style: {color: 'inherit'}
+                    },
+                    {default: () => row.ports.join(',')}
+                ),
+                h(
+                    NIcon,
+                    {
+                      size: '18',
+                      component: CopyOutline,
+                      color: '#18a058',
+                      style: {
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        display: 'flex'
+                      },
+                      onClick: (e: { stopPropagation: () => void; }) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(row.ports.join(',')).then(() => {
+                          message.success('已成功复制到剪贴板');
+                        });
+                      }
+                    }
+                )
+              ]
+            }
+        );
       }
     },
     {
       title: '状态',
       key: 'status',
       align: 'center',
+      width: 80,
       render(row) {
         return h(
             NSwitch,
@@ -80,16 +138,112 @@ function createColumns({del, edit}: {
       title: '用户名',
       key: 'username',
       align: 'center',
+      width: 150,
+      ellipsis: {
+        tooltip: true
+      },
+      render(row) {
+        if (!row.username) return '-';
+        return h(
+            NSpace,
+            {
+              align: 'center',   // 关键：确保子元素在交叉轴（垂直方向）居中
+              justify: 'center',
+              inline: true,
+              wrap: false,       // 强制不换行
+              size: 6            // 设置文字和图标的间距
+            },
+            {
+              default: () => [
+                h(
+                    NText,
+                    {
+                      depth: 2,
+                      style: {color: 'inherit'}
+                    },
+                    {default: () => row.username}
+                ),
+                h(
+                    NIcon,
+                    {
+                      size: '18',
+                      component: CopyOutline,
+                      color: '#18a058',
+                      style: {
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        display: 'flex'
+                      },
+                      onClick: (e: { stopPropagation: () => void; }) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(row.username).then(() => {
+                          message.success('已成功复制到剪贴板');
+                        });
+                      }
+                    }
+                )
+              ]
+            }
+        );
+      }
     },
     {
       title: '备注',
       key: 'remark',
       align: 'center',
+      ellipsis: {
+        tooltip: true
+      },
+      render(row) {
+        if (!row.remark) return '-';
+        return h(
+            NSpace,
+            {
+              align: 'center',   // 关键：确保子元素在交叉轴（垂直方向）居中
+              justify: 'center',
+              inline: true,
+              wrap: false,       // 强制不换行
+              size: 6            // 设置文字和图标的间距
+            },
+            {
+              default: () => [
+                h(
+                    NText,
+                    {
+                      depth: 2,
+                      style: {color: 'inherit'}
+                    },
+                    {default: () => row.remark}
+                ),
+                h(
+                    NIcon,
+                    {
+                      size: '18',
+                      component: CopyOutline,
+                      color: '#18a058',
+                      style: {
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                        display: 'flex'
+                      },
+                      onClick: (e: { stopPropagation: () => void; }) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(row.remark).then(() => {
+                          message.success('已成功复制到剪贴板');
+                        });
+                      }
+                    }
+                )
+              ]
+            }
+        );
+      }
     },
     {
       title: '操作',
       key: 'actions',
       align: 'center',
+      width: 140,
       render(row) {
         return h(
             NSpace,
