@@ -5,7 +5,7 @@ import {useUserStore} from "@/stores/userStore";
 const {message} = createDiscreteApi(['message'])
 
 const httpInstance = axios.create({
-    baseURL: 'http://18.142.89.242:17778', // http://127.0.0.1:17778', // TODO location.origin + '/apis',
+    baseURL: 'https://ipwl.aircoforce.com', // http://127.0.0.1:17778', // TODO location.origin + '/apis',
     timeout: 40000,
 })
 
