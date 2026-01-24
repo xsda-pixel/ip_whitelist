@@ -1,13 +1,14 @@
 {
   "name": "ip_whitelist",
   "private": true,
-  "version": "2.1.13",
+  "version": "2.1.15",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "format": "prettier --write src/"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -26,8 +27,11 @@
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.0.10",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/eslint-config-prettier": "^10.2.0",
     "naive-ui": "^2.43.2",
     "typescript": "~5.6.2",
+    "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
     "unplugin-auto-import": "^21.0.0",
     "unplugin-vue-components": "^31.0.0",
     "vite": "^6.0.3",

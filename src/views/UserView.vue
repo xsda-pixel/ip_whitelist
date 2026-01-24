@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {NButton, useMessage, useDialog} from 'naive-ui'
-import type {DataTableColumns} from 'naive-ui'
-import {ref, h, onMounted, computed} from "vue";
+import { NButton, useMessage, useDialog } from 'naive-ui'
+import type { DataTableColumns } from 'naive-ui'
+import { ref, h, onMounted, computed } from 'vue'
 import * as clipboard from 'clipboard-polyfill'
-import {useGlobalLoading} from '@/composables/useGlobalLoading'
-import {addRuleAPI, deleteRuleAPI, listAPI} from "@/apis/api";
-import type {IpData} from "@/types/type";
-import {useUserStore} from "@/stores/userStore";
+import { useGlobalLoading } from '@/composables/useGlobalLoading'
+import { addRuleAPI, deleteRuleAPI, listAPI } from '@/apis/api'
+import type { IpData } from '@/types/type'
+import { useUserStore } from '@/stores/userStore'
 
-const {startLoading, stopLoading} = useGlobalLoading()
+const { startLoading, stopLoading } = useGlobalLoading()
 const ipAddress = ref('')
 const items = ref<IpData[]>([])
 const isLock = ref(false)
@@ -28,9 +28,7 @@ const pasteContent = async () => {
   }
 }
 
-function createColumns({play}: {
-  play: (row: IpData) => void
-}): DataTableColumns<IpData> {
+function createColumns({ play }: { play: (row: IpData) => void }): DataTableColumns<IpData> {
   return [
     {
       title: '类型',
@@ -58,17 +56,17 @@ function createColumns({play}: {
       align: 'center',
       render(row) {
         return h(
-            NButton,
-            {
-              strong: true,
-              tertiary: true,
-              size: 'small',
-              onClick: () => play(row)
-            },
-            {default: () => '删除'}
+          NButton,
+          {
+            strong: true,
+            tertiary: true,
+            size: 'small',
+            onClick: () => play(row),
+          },
+          { default: () => '删除' },
         )
-      }
-    }
+      },
+    },
   ]
 }
 
@@ -81,9 +79,9 @@ const columns = createColumns({
       negativeText: '取消',
       onPositiveClick: () => {
         deleteIp(row.source, row.portRange)
-      }
+      },
     })
-  }
+  },
 })
 
 const pagination = false as const
@@ -94,12 +92,12 @@ const onGetPublicIp = async () => {
     // 使用 ipify 的免费接口 (支持 HTTPS 和 CORS)
     const response = await fetch('https://api.ipify.org?format=json')
     if (!response.ok) {
-      message.error("获取失败")
+      message.error('获取失败')
       return
     }
 
     const data = await response.json()
-    message.success("获取成功")
+    message.success('获取成功')
     ipAddress.value = data.ip
   } finally {
     stopLoading()
@@ -114,14 +112,16 @@ const onAddIp = () => {
 
   startLoading()
 
-  addRuleAPI(ipAddress.value, port.value ?? '').then(() => {
-    ipAddress.value = ''
-    message.success("添加成功")
-    getList()
-  }).finally(() => {
-    stopLoading()
-    isLock.value = false
-  })
+  addRuleAPI(ipAddress.value, port.value ?? '')
+    .then(() => {
+      ipAddress.value = ''
+      message.success('添加成功')
+      getList()
+    })
+    .finally(() => {
+      stopLoading()
+      isLock.value = false
+    })
 }
 
 const deleteIp = (source: string, port: string) => {
@@ -132,21 +132,25 @@ const deleteIp = (source: string, port: string) => {
 
   startLoading()
 
-  deleteRuleAPI(source, port).then(() => {
-    message.success("删除成功")
-    getList()
-  }).finally(() => {
-    stopLoading()
-    isLock.value = false
-  })
+  deleteRuleAPI(source, port)
+    .then(() => {
+      message.success('删除成功')
+      getList()
+    })
+    .finally(() => {
+      stopLoading()
+      isLock.value = false
+    })
 }
 
 const getList = () => {
-  listAPI().then((res) => {
-    items.value = res.data
-  }).finally(() => {
-    stopLoading()
-  })
+  listAPI()
+    .then((res) => {
+      items.value = res.data
+    })
+    .finally(() => {
+      stopLoading()
+    })
 }
 
 const onRefresh = () => {
@@ -163,16 +167,16 @@ const onLogout = () => {
     negativeText: '取消',
     onPositiveClick: () => {
       userStore.clearUserInfo()
-    }
+    },
   })
 }
 
 const options = computed(() => {
   const ports = new Set<string>()
-  userStore.userInfo.ports.forEach(item => {
+  userStore.userInfo.ports.forEach((item) => {
     ports.add(item.toString())
   })
-  return Array.from(ports).map(port => ({label: port, value: port}))
+  return Array.from(ports).map((port) => ({ label: port, value: port }))
 })
 
 onMounted(() => {
@@ -181,45 +185,43 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="pt-[5vh] flex flex-col justify-center items-center gap-4 h-screen">
+  <main class="flex h-screen flex-col items-center justify-center gap-4 pt-[5vh]">
     <div class="flex gap-2">
-      <n-input v-model:value.trim="ipAddress" class="w-[40vw]!" type="text" clearable placeholder="请输入IP地址">
+      <n-input
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        autocomplete="off"
+        v-model:value.trim="ipAddress"
+        class="w-[40vw]!"
+        type="text"
+        clearable
+        placeholder="请输入IP地址"
+      >
         <template #suffix>
-          <div @click="pasteContent" class="ml-2 text-sm cursor-pointer">
-            粘贴
-          </div>
+          <div @click="pasteContent" class="ml-2 cursor-pointer text-sm">粘贴</div>
         </template>
       </n-input>
       <div class="w-20">
-        <n-select v-model:value="port" placeholder="端口号" :options="options"/>
+        <n-select v-model:value="port" placeholder="端口号" :options="options" />
       </div>
-      <div class="flex gap-2 text-sm items-center">
-        <n-button @click="onAddIp" type="primary">
-          添加
-        </n-button>
-        <n-button @click="onGetPublicIp" type="info">
-          获取本机IP
-        </n-button>
-        <n-button @click="onRefresh" type="tertiary">
-          刷新
-        </n-button>
-        <n-button @click="onLogout" type="warning">
-          退出登录
-        </n-button>
+      <div class="flex items-center gap-2 text-sm">
+        <n-button @click="onAddIp" type="primary">添加</n-button>
+        <n-button @click="onGetPublicIp" type="info">获取本机IP</n-button>
+        <n-button @click="onRefresh" type="tertiary">刷新</n-button>
+        <n-button @click="onLogout" type="warning">退出登录</n-button>
       </div>
     </div>
     <n-data-table
-        class="w-full flex-1"
-        flex-height
-        :columns="columns"
-        :data="items"
-        :pagination="pagination"
-        :bordered="false"
+      class="w-full flex-1"
+      flex-height
+      :columns="columns"
+      :data="items"
+      :pagination="pagination"
+      :bordered="false"
     />
     <div></div>
   </main>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

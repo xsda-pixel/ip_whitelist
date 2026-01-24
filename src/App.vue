@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import {NConfigProvider, NMessageProvider, NDialogProvider, NSpin} from 'naive-ui'
-import {useGlobalLoading} from './composables/useGlobalLoading'
-import {RouterView} from 'vue-router'
+import { NConfigProvider, NMessageProvider, NDialogProvider, NSpin } from 'naive-ui'
+import { useGlobalLoading } from './composables/useGlobalLoading'
+import { RouterView } from 'vue-router'
 
 // 获取状态，绑定到 n-spin 上
-const {isLoading, loadingText} = useGlobalLoading()
-
+const { isLoading, loadingText } = useGlobalLoading()
 </script>
 
 <template>
@@ -13,12 +12,8 @@ const {isLoading, loadingText} = useGlobalLoading()
     <n-message-provider>
       <n-dialog-provider>
         <n-modal-provider>
-          <n-spin
-              :show="isLoading"
-              :description="loadingText"
-              class="global-spin-container"
-          >
-            <RouterView/>
+          <n-spin :show="isLoading" :description="loadingText" class="global-spin-container">
+            <RouterView />
           </n-spin>
         </n-modal-provider>
       </n-dialog-provider>

@@ -7,4 +7,3 @@ export const loginAPI = (username: string, password: string) => {
     data: { username, password },
   })
 }
-
