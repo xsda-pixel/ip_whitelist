@@ -114,7 +114,7 @@ const onAddIp = () => {
 
   startLoading()
 
-  addRuleAPI(ipAddress.value, port.value).then(() => {
+  addRuleAPI(ipAddress.value, port.value ?? '').then(() => {
     ipAddress.value = ''
     message.success("添加成功")
     getList()
