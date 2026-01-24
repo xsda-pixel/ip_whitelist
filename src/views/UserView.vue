@@ -15,7 +15,7 @@ const isLock = ref(false)
 const dialog = useDialog()
 const message = useMessage()
 const userStore = useUserStore()
-const port = ref('端口号')
+const port = ref<string | null>(null)
 
 const pasteContent = async () => {
   try {
@@ -191,7 +191,7 @@ onMounted(() => {
         </template>
       </n-input>
       <div class="w-20">
-        <n-select v-model:value="port" :options="options"/>
+        <n-select v-model:value="port" placeholder="端口号" :options="options"/>
       </div>
       <div class="flex gap-2 text-sm items-center">
         <n-button @click="onAddIp" type="primary">

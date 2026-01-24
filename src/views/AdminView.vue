@@ -16,6 +16,7 @@ const message = useMessage()
 const userStore = useUserStore()
 const showModal = ref(false)
 const reqData = reactive<UserRequestData>({
+  provider: null,
   region: '',
   username: '',
   password: '',
@@ -26,16 +27,33 @@ const reqData = reactive<UserRequestData>({
   remark: '',
 })
 
+const providerOptions = [
+  {label: '亚马逊', value: 'aws'},
+  {label: '阿里云', value: 'aliyun'},
+  // TODO {label: '腾讯云', value: 'tencent'}, 暂不支持
+  // TODO {label: '华为云', value: 'huawei'}, 暂不支持
+]
+
 function createColumns({del, edit}: {
   del: (row: UserItemData) => void,
   edit: (row: UserItemData) => void
 }): DataTableColumns<UserItemData> {
   return [
     {
+      title: '服务商',
+      key: 'provider',
+      align: 'center',
+      width: 72,
+      ellipsis: {
+        tooltip: true
+      },
+      render: (row) => getProviderName(row.provider),
+    },
+    {
       title: '区域',
       key: 'region',
       align: 'center',
-      width: 120,
+      width: 80,
       ellipsis: {
         tooltip: true
       }
@@ -65,50 +83,7 @@ function createColumns({del, edit}: {
       ellipsis: {
         tooltip: true
       },
-      render(row) {
-        if (row.ports.length === 0) return '-';
-        return h(
-            NSpace,
-            {
-              align: 'center',   // 关键：确保子元素在交叉轴（垂直方向）居中
-              justify: 'center',
-              inline: true,
-              wrap: false,       // 强制不换行
-              size: 6            // 设置文字和图标的间距
-            },
-            {
-              default: () => [
-                h(
-                    NText,
-                    {
-                      depth: 2,
-                      style: {color: 'inherit'}
-                    },
-                    {default: () => row.ports.join(',')}
-                ),
-                h(
-                    NIcon,
-                    {
-                      size: '18',
-                      component: CopyOutline,
-                      color: '#18a058',
-                      style: {
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                        display: 'flex'
-                      },
-                      onClick: (e: { stopPropagation: () => void; }) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(row.ports.join(',')).then(() => {
-                          message.success('已成功复制到剪贴板');
-                        });
-                      }
-                    }
-                )
-              ]
-            }
-        );
-      }
+      render: (row) => renderCopyableText(row.ports.join(',')),
     },
     {
       title: '状态',
@@ -142,50 +117,7 @@ function createColumns({del, edit}: {
       ellipsis: {
         tooltip: true
       },
-      render(row) {
-        if (!row.username) return '-';
-        return h(
-            NSpace,
-            {
-              align: 'center',   // 关键：确保子元素在交叉轴（垂直方向）居中
-              justify: 'center',
-              inline: true,
-              wrap: false,       // 强制不换行
-              size: 6            // 设置文字和图标的间距
-            },
-            {
-              default: () => [
-                h(
-                    NText,
-                    {
-                      depth: 2,
-                      style: {color: 'inherit'}
-                    },
-                    {default: () => row.username}
-                ),
-                h(
-                    NIcon,
-                    {
-                      size: '18',
-                      component: CopyOutline,
-                      color: '#18a058',
-                      style: {
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                        display: 'flex'
-                      },
-                      onClick: (e: { stopPropagation: () => void; }) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(row.username).then(() => {
-                          message.success('已成功复制到剪贴板');
-                        });
-                      }
-                    }
-                )
-              ]
-            }
-        );
-      }
+      render: (row) => renderCopyableText(row.username),
     },
     {
       title: '备注',
@@ -194,50 +126,7 @@ function createColumns({del, edit}: {
       ellipsis: {
         tooltip: true
       },
-      render(row) {
-        if (!row.remark) return '-';
-        return h(
-            NSpace,
-            {
-              align: 'center',   // 关键：确保子元素在交叉轴（垂直方向）居中
-              justify: 'center',
-              inline: true,
-              wrap: false,       // 强制不换行
-              size: 6            // 设置文字和图标的间距
-            },
-            {
-              default: () => [
-                h(
-                    NText,
-                    {
-                      depth: 2,
-                      style: {color: 'inherit'}
-                    },
-                    {default: () => row.remark}
-                ),
-                h(
-                    NIcon,
-                    {
-                      size: '18',
-                      component: CopyOutline,
-                      color: '#18a058',
-                      style: {
-                        cursor: 'pointer',
-                        flexShrink: 0,
-                        display: 'flex'
-                      },
-                      onClick: (e: { stopPropagation: () => void; }) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(row.remark).then(() => {
-                          message.success('已成功复制到剪贴板');
-                        });
-                      }
-                    }
-                )
-              ]
-            }
-        );
-      }
+      render: (row) => renderCopyableText(row.remark),
     },
     {
       title: '操作',
@@ -280,6 +169,72 @@ function createColumns({del, edit}: {
   ]
 }
 
+const getProviderName = (provider: string) => {
+  switch (provider) {
+    case 'aws':
+      return '亚马逊'
+    case 'aliyun':
+      return '阿里云'
+    case 'tencent':
+      return '腾讯云'
+    case 'huawei':
+      return '华为云'
+    default:
+      return provider
+  }
+}
+
+/**
+ * 抽象出的通用复制渲染函数
+ * @param text 需要显示的文字内容
+ */
+const renderCopyableText = (text: string | undefined | null) => {
+  if (!text) return '-'
+
+  return h(
+      NSpace,
+      {
+        align: 'center',
+        justify: 'center',
+        inline: true,
+        wrap: false,
+        size: 6
+      },
+      {
+        default: () => [
+          h(
+              NText,
+              {
+                depth: 2,
+                // 解决 Tooltip 变灰问题
+                style: {color: 'inherit'}
+              },
+              {default: () => text}
+          ),
+          h(
+              NIcon,
+              {
+                size: '18',
+                component: CopyOutline,
+                color: '#18a058',
+                style: {
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  display: 'flex'
+                },
+                onClick: (e: MouseEvent) => {
+                  e.stopPropagation()
+                  navigator.clipboard.writeText(text).then(() => {
+                    message.success('已成功复制到剪贴板')
+                  })
+                }
+              }
+          )
+        ]
+      }
+  )
+}
+
 const columns = createColumns({
   del(row: UserItemData) {
     dialog.create({
@@ -294,6 +249,7 @@ const columns = createColumns({
   },
   edit(row: UserItemData) {
     reqData.userId = row.userId
+    reqData.provider = row.provider
     reqData.region = row.region
     reqData.username = row.username
     reqData.accessKey = row.accessKey
@@ -378,6 +334,7 @@ const onAddUser = () => {
 const onCloseModal = () => {
   showModal.value = false
   Object.assign(reqData, {
+    provider: null,
     region: '',
     username: '',
     password: '',
@@ -442,6 +399,8 @@ onMounted(() => {
       <div>添加账号</div>
     </template>
     <div class="flex flex-col gap-4 my-4">
+      <n-select v-model:value="reqData.provider" :disabled="reqData.userId" placeholder="请选择云服务商"
+                :options="providerOptions"/>
       <n-input v-model:value.trim="reqData.region" type="text" clearable placeholder="请输入区域"/>
       <n-input v-model:value.trim="reqData.accessKey" type="text" clearable placeholder="请输入Access key ID"/>
       <n-input v-model:value.trim="reqData.secretKey" type="text" clearable

@@ -23,6 +23,7 @@ export enum UserStatus {
 
 export interface UserRequestData {
     userId?: number
+    provider: string | null
     region: string
     username: string
     password: string
@@ -35,6 +36,7 @@ export interface UserRequestData {
 
 export interface UserItemData {
     userId: number;
+    provider: string;
     type: number;
     username: string;
     accessKey: string;

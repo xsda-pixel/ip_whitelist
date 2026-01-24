@@ -6,6 +6,7 @@ const {message} = createDiscreteApi(['message'])
 
 const httpInstance = axios.create({
     baseURL: 'https://ipwl.aircoforce.com', // http://127.0.0.1:17778', // TODO location.origin + '/apis',
+    // baseURL: 'http://127.0.0.1:17778',
     timeout: 40000,
 })
 
