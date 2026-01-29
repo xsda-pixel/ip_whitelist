@@ -84,7 +84,19 @@ const columns = createColumns({
   },
 })
 
-const pagination = false as const
+const pagination = ref({
+  page: 1,
+  pageSize: 10,
+  showSizePicker: true, // 是否显示每页条数选择器
+  pageSizes: [10, 20, 50], // 每页条数选项
+  onChange: (page: number) => {
+    pagination.value.page = page // 更新当前页
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    pagination.value.pageSize = pageSize // 更新每页条数
+    pagination.value.page = 1 // 切换每页大小时通常重置回第一页
+  },
+})
 
 const onGetPublicIp = async () => {
   try {
@@ -213,7 +225,7 @@ onMounted(() => {
       </div>
     </div>
     <n-data-table
-      class="w-full flex-1"
+      class="w-full flex-1 px-4"
       flex-height
       :columns="columns"
       :data="items"
